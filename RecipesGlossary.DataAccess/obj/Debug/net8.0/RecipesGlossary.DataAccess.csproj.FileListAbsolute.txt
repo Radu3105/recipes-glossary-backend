@@ -1,0 +1,16 @@
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\bin\Debug\net8.0\RecipesGlossary.DataAccess.deps.json
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\bin\Debug\net8.0\RecipesGlossary.DataAccess.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\bin\Debug\net8.0\RecipesGlossary.DataAccess.pdb
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.csproj.AssemblyReference.cache
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.AssemblyInfoInputs.cache
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.AssemblyInfo.cs
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.sourcelink.json
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\refint\RecipesGlossary.DataAccess.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.pdb
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\ref\RecipesGlossary.DataAccess.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\bin\Debug\net8.0\RecipesGlossary.Shared.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\bin\Debug\net8.0\RecipesGlossary.Shared.pdb
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.DataAccess\obj\Debug\net8.0\RecipesGlossary.DataAccess.csproj.CopyComplete

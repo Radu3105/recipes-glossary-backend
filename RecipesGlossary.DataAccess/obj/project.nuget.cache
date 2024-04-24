@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "N3li5grxzpXPY7t9mGqjnKyh0geINLjeooPCvYMet8RyeFXpYDHo7h+bxOeybJwJ0wvJJhBjIOQ2cMgv5vuP7A==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\radug\\Documents\\Programming\\Web Applications\\Recipes Glossary\\Backend\\RecipesGlossary\\RecipesGlossary.DataAccess\\RecipesGlossary.DataAccess.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\radug\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\5.0.0\\microsoft.bcl.asyncinterfaces.5.0.0.nupkg.sha512",
+    "C:\\Users\\radug\\.nuget\\packages\\neo4j.driver\\5.18.1\\neo4j.driver.5.18.1.nupkg.sha512",
+    "C:\\Users\\radug\\.nuget\\packages\\system.io.pipelines\\7.0.0\\system.io.pipelines.7.0.0.nupkg.sha512",
+    "C:\\Users\\radug\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}

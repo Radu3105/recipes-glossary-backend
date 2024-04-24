@@ -1,0 +1,12 @@
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\bin\Debug\net8.0\RecipesGlossary.Shared.deps.json
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\bin\Debug\net8.0\RecipesGlossary.Shared.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\bin\Debug\net8.0\RecipesGlossary.Shared.pdb
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.AssemblyInfoInputs.cache
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.AssemblyInfo.cs
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.csproj.CoreCompileInputs.cache
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.sourcelink.json
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\refint\RecipesGlossary.Shared.dll
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\RecipesGlossary.Shared.pdb
+C:\Users\radug\Documents\Programming\Web Applications\Recipes Glossary\Backend\RecipesGlossary\RecipesGlossary.Shared\obj\Debug\net8.0\ref\RecipesGlossary.Shared.dll
