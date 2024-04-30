@@ -16,8 +16,12 @@ namespace RecipesGlossary
             builder.Services.AddSingleton(s => GraphDatabase.Driver(neoConfig["Uri"], AuthTokens.Basic(neoConfig["Username"], neoConfig["Password"])));
 
             builder.Services.AddSingleton<IRecipeRepository, RecipeRepository>();
+            builder.Services.AddSingleton<IIngredientRepository, IngredientRepository>();
+
 
             builder.Services.AddTransient<RecipeService>();
+            builder.Services.AddTransient<IngredientService>();
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

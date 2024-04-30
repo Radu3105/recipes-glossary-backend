@@ -65,10 +65,24 @@ namespace RecipesGlossary.Controllers
             return Ok(total);
         }
         
+        [HttpGet("top-5-most-common-ingredients/")]
+        public async Task<IActionResult> GetTop5MostCommonIngredients()
+        {
+            var recipes = await _recipeService.GetTop5MostCommonIngredients();
+            return Ok(recipes);
+        }
+
+        [HttpGet("top-5-most-prolific-authors/")]
+        public async Task<IActionResult> GetTop5MostProlificAuthors()
+        {
+            var recipes = await _recipeService.GetTop5MostProlificAuthors();
+            return Ok(recipes);
+        }
+
         [HttpGet("top-5-most-complex-recipes/")]
         public async Task<IActionResult> Get5MostComplexRecipes()
         {
-            var recipes = await _recipeService.Get5MostComplexRecipes();
+            var recipes = await _recipeService.GetTop5MostComplexRecipes();
             return Ok(recipes);
         }
     }

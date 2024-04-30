@@ -12,11 +12,13 @@ namespace RecipesGlossary.DataAccess.Abstractions
     public interface IRecipeRepository : IGenericRepository<Recipe>
     {
         Task<IEnumerable<RecipeDisplayDTO>> GetPaginatedAsync(int pageNumber, string sortBy, string sortOrder);
-        Task<IEnumerable<RecipeDisplayDTO>> SearchByNameAsync(int pageNumber, string searchQuery);
-        Task<IEnumerable<RecipeDisplayDTO>> FilterByIngredientsAsync(int pageNumber, List<string> ingredients);
+        Task<SearchByNameDTO> SearchByNameAsync(int pageNumber, string searchQuery);
+        Task<FilterByIngredientRecipeDTO> FilterByIngredientsAsync(int pageNumber, List<string> ingredients);
         Task<IEnumerable<AuthorDisplayDTO>> GetAllByAuthorAsync(string authorName, int pageNumber);
+        Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredients();
+        Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthors();
+        Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipes();
         Task<int> CountRecipesAsync();
         Task<int> CountRecipesByAuthorAsync(string authorName);
-        Task<IEnumerable<RecipeDisplayDTO>> Get5MostComplexRecipes();
     }
 }

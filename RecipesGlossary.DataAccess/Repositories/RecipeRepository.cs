@@ -126,7 +126,7 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<RecipeDisplayDTO>> SearchByNameAsync(int pageNumber, string searchQuery)
+        public async Task<SearchByNameDTO> SearchByNameAsync(int pageNumber, string searchQuery)
         {
             using var session = _driver.AsyncSession();
             try
@@ -145,8 +145,14 @@ namespace RecipesGlossary.DataAccess.Repositories
                     LIMIT {PAGE_SIZE};
                 ";
 
+                string totalMatchingQuery = $@"
+                    MATCH (recipe:Recipe)
+                    WHERE recipe.name CONTAINS $searchQuery
+                    RETURN COUNT(recipe) AS totalMatchingRecipes;
+                ";
+
                 var result = await session.RunAsync(query, new { searchQuery });
-                return await result.ToListAsync(record =>
+                var recipes = await result.ToListAsync(record =>
                 {
                     var recipeNode = record["recipe"].As<INode>();
                     var authorNode = record["author"].As<INode>();
@@ -156,10 +162,20 @@ namespace RecipesGlossary.DataAccess.Repositories
                         RecipeId = recipeNode.Properties["id"].As<string>(),
                         RecipeName = recipeNode.Properties["name"].As<string>(),
                         AuthorName = authorNode.Properties["name"].As<string>(),
-                        IngredientCount = record["ingredientCount"].As<int>(), 
-                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>() 
+                        IngredientCount = record["ingredientCount"].As<int>(),
+                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>()
                     };
                 });
+
+                var countResult = await session.RunAsync(totalMatchingQuery, new { searchQuery });
+                var totalCountRecord = await countResult.SingleAsync();
+                var totalCount = totalCountRecord["totalMatchingRecipes"].As<int>();
+
+                return new SearchByNameDTO
+                {
+                    Recipes = recipes,
+                    TotalCount = totalCount
+                };
             }
             finally
             {
@@ -167,7 +183,7 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<RecipeDisplayDTO>> FilterByIngredientsAsync(int pageNumber, List<string> ingredientList)
+        public async Task<FilterByIngredientRecipeDTO> FilterByIngredientsAsync(int pageNumber, List<string> ingredientList)
         {
             using var session = _driver.AsyncSession();
             try
@@ -189,8 +205,16 @@ namespace RecipesGlossary.DataAccess.Repositories
                     LIMIT {PAGE_SIZE};
                 ";
 
+                string totalMatchingQuery = $@"
+                    MATCH (recipe: Recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
+                    WHERE ingredient.name IN $ingredientList
+                    WITH recipe, COLLECT(ingredient) AS ingredients
+                    WHERE ALL(ing IN $ingredientList WHERE ing IN [i.name FOR i IN ingredients])
+                    RETURN count(DISTINCT recipe) AS totalMatchingRecipes;
+                ";
+
                 var result = await session.RunAsync(query, new { ingredientList });
-                return await result.ToListAsync(record =>
+                var recipes = await result.ToListAsync(record =>
                 {
                     var recipeNode = record["recipe"].As<INode>();
                     var authorNode = record["author"].As<INode>();
@@ -204,7 +228,18 @@ namespace RecipesGlossary.DataAccess.Repositories
                         SkillLevel = recipeNode.Properties["skillLevel"].As<string>() 
                     };
                 });
+
+                var countResult = await session.RunAsync(totalMatchingQuery, new { ingredientList });
+                var totalCountRecord = await countResult.SingleAsync();
+                var totalCount = totalCountRecord["totalMatchingRecipes"].As<int>();
+
+                return new FilterByIngredientRecipeDTO
+                {
+                    Recipes = recipes,
+                    TotalCount = totalCount
+                };
             }
+
             finally
             {
                 await session.CloseAsync();
@@ -247,6 +282,103 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
+        public async Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredients()
+        {
+            using var session = _driver.AsyncSession();
+            try
+            {
+                var query = @"
+                    MATCH (recipe: Recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
+                    RETURN ingredient, SIZE(COLLECT(recipe)) AS recipeCount
+                    ORDER BY recipeCount DESC
+                    LIMIT 5;
+                ";
+
+                var result = await session.RunAsync(query);
+                return await result.ToListAsync(record =>
+                {
+                    var ingredientNode = record["ingredient"].As<INode>();
+
+                    return new CommonIngredientDTO
+                    {
+                        Name = ingredientNode["name"].As<string>(),
+                        RecipeCount = record["recipeCount"].As<int>()
+                    };
+                });
+            }
+            finally
+            {
+                await session.CloseAsync();
+            }
+        }
+
+        public async Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthors()
+        {
+            using var session = _driver.AsyncSession();
+            try
+            {
+                var query = @"
+                    MATCH (author: Author)-[:WROTE]->(recipe: Recipe)
+                    RETURN author, SIZE(COLLECT(recipe)) AS recipeCount
+                    ORDER BY recipeCount DESC
+                    LIMIT 5;
+                ";
+
+                var result = await session.RunAsync(query);
+                return await result.ToListAsync(record =>
+                {
+                    var authorNode = record["author"].As<INode>();
+
+                    return new ProlificAuthorDTO
+                    {
+                        AuthorName = authorNode.Properties["name"].As<string>(),
+                        RecipeCount = record["recipeCount"].As<int>()
+                    };
+                });
+            }
+            finally
+            {
+                await session.CloseAsync();
+            }
+        }
+
+        public async Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipes()
+        {
+            using var session = _driver.AsyncSession();
+            try
+            {
+                var query = @"
+                    MATCH (author: Author)-[:WROTE]->(recipe: Recipe) 
+                    OPTIONAL MATCH (recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
+                    WITH recipe, author, COLLECT(ingredient) AS ingredients
+                    WITH recipe, author, SIZE(ingredients) AS ingredientCount
+                    ORDER BY ingredientCount DESC
+                    RETURN author, recipe, ingredientCount
+                    LIMIT 5;
+                ";
+
+                var result = await session.RunAsync(query);
+                return await result.ToListAsync(record =>
+                {
+                    var recipeNode = record["recipe"].As<INode>();
+                    var authorNode = record["author"].As<INode>();
+
+                    return new RecipeDisplayDTO
+                    {
+                        RecipeId = recipeNode.Properties["id"].As<string>(),
+                        RecipeName = recipeNode.Properties["name"].As<string>(),
+                        AuthorName = authorNode.Properties["name"].As<string>(),
+                        IngredientCount = record["ingredientCount"].As<int>(),
+                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>()
+                    };
+                });
+            }
+            finally
+            {
+                await session.CloseAsync();
+            }
+        }
+
         public async Task<int> CountRecipesAsync()
         {
             using var session = _driver.AsyncSession();
@@ -280,43 +412,6 @@ namespace RecipesGlossary.DataAccess.Repositories
                 var result = await session.RunAsync(query, new { authorName });
                 var record = await result.SingleAsync();
                 return record["total"].As<int>();
-            }
-            finally
-            {
-                await session.CloseAsync();
-            }
-        }
-
-        public async Task<IEnumerable<RecipeDisplayDTO>> Get5MostComplexRecipes()
-        {
-            using var session = _driver.AsyncSession();
-            try
-            {
-                var query = @"
-                    MATCH (author: Author)-[:WROTE]->(recipe: Recipe) 
-                    OPTIONAL MATCH (recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
-                    WITH recipe, author, COLLECT(ingredient) AS ingredients
-                    WITH recipe, author, SIZE(ingredients) AS ingredientCount
-                    ORDER BY ingredientCount DESC
-                    RETURN author, recipe, ingredientCount
-                    LIMIT 5;
-                ";
-
-                var result = await session.RunAsync(query);
-                return await result.ToListAsync(record =>
-                {
-                    var recipeNode = record["recipe"].As<INode>();
-                    var authorNode = record["author"].As<INode>();
-
-                    return new RecipeDisplayDTO
-                    {
-                        RecipeId = recipeNode.Properties["id"].As<string>(),
-                        RecipeName = recipeNode.Properties["name"].As<string>(),
-                        AuthorName = authorNode.Properties["name"].As<string>(),
-                        IngredientCount = record["ingredientCount"].As<int>(),
-                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>()
-                    };
-                });
             }
             finally
             {

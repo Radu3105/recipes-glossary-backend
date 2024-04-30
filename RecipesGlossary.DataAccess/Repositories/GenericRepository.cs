@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RecipesGlossary.DataAccess.Repositories
 {
-    public abstract class GenericRepository<T> : IGenericRepository<T> where T : GenericModel
+    public abstract class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly IDriver _driver;
 
