@@ -44,17 +44,10 @@ namespace RecipesGlossary
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
-
-            // HTTPS redirection only in production (Heroku handles HTTPS)
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
             }
 
             app.UseCors("MyCorsPolicy");
