@@ -33,7 +33,7 @@ namespace RecipesGlossary
             {
                 options.AddPolicy("MyCorsPolicy", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins("http://localhost:5173", "https://resonant-custard-008476.netlify.app")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
