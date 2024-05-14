@@ -1,8 +1,10 @@
-
 using Neo4j.Driver;
 using RecipesGlossary.Business.Services;
 using RecipesGlossary.DataAccess.Abstractions;
 using RecipesGlossary.DataAccess.Repositories;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
+
 namespace RecipesGlossary
 {
     public class Program
@@ -49,7 +51,11 @@ namespace RecipesGlossary
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            // HTTPS redirection only in production (Heroku handles HTTPS)
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseCors("MyCorsPolicy");
 

@@ -1,1 +1,0 @@
-web: dotnet run --project RecipesGlossary.csproj --urls "http://0.0.0.0:${PORT}"
