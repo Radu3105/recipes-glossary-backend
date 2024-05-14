@@ -13,9 +13,9 @@ namespace RecipesGlossary.DataAccess.Abstractions
     {
         Task<RecipeDisplayWithTotalCountDTO> GetRecipesAsync(int pageNumber, string sortBy, string sortOrder, string searchQuery, List<string> ingredientFilters);
         Task<IEnumerable<AuthorDisplayDTO>> GetAllByAuthorAsync(string authorName, int pageNumber);
-        Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredients();
-        Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthors();
-        Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipes();
+        Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredientsAsync();
+        Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthorsAsync();
+        Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipesAsync();
         Task<int> CountRecipesByAuthorAsync(string authorName);
     }
 }

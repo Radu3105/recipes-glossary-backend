@@ -4,6 +4,7 @@ using RecipesGlossary.Business.Services;
 using RecipesGlossary.DataAccess.Abstractions;
 using RecipesGlossary.DataAccess.Models;
 using RecipesGlossary.DataAccess.Repositories;
+using RecipesGlossary.Shared.DTOs;
 
 namespace RecipesGlossary.Controllers
 {
@@ -72,5 +73,4 @@ namespace RecipesGlossary.Controllers
             return Ok(recipes);
         }
     }
-
 }

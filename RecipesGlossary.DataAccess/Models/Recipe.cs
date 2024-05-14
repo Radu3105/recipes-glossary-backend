@@ -16,5 +16,6 @@ namespace RecipesGlossary.DataAccess.Models
         public string[] Collections { get; set; }
         public string[] Keywords { get; set; }
         public string[] DietTypes { get; set; }
+        public List<SimilarRecipe> SimilarRecipes { get; set; }
     }
 }

@@ -37,17 +37,17 @@ namespace RecipesGlossary.Business.Services
 
         public async Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredients()
         {
-            return await _recipeRepository.GetTop5MostCommonIngredients();
+            return await _recipeRepository.GetTop5MostCommonIngredientsAsync();
         } 
 
         public async Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthors()
         {
-            return await _recipeRepository.GetTop5MostProlificAuthors();
+            return await _recipeRepository.GetTop5MostProlificAuthorsAsync();
         }   
         
         public async Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipes()
         {
-            return await _recipeRepository.GetTop5MostComplexRecipes();
+            return await _recipeRepository.GetTop5MostComplexRecipesAsync();
         }
 
         public async Task<int> GetTotalRecipesByAuthorAsync(string authorName)

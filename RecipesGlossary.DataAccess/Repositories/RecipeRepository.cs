@@ -33,17 +33,52 @@ namespace RecipesGlossary.DataAccess.Repositories
                     OPTIONAL MATCH (recipe)-[:KEYWORD]->(keyword: Keyword)
                     WITH recipe, ingredients, collections, COLLECT(keyword.name) AS keywords
                     OPTIONAL MATCH (recipe)-[:DIET_TYPE]->(dietType: DietType)
-                    RETURN recipe, ingredients, collections, keywords, COLLECT(dietType.name) AS dietTypes;
+                    WITH recipe, ingredients, collections, keywords, COLLECT(dietType.name) AS dietTypes
+    
+                    // Calculate similarity with other recipes
+                    MATCH (other: Recipe)
+                    WHERE other.id <> recipe.id
+                    OPTIONAL MATCH (other)-[:CONTAINS_INGREDIENT]->(oIngredient: Ingredient)
+                    WITH recipe, ingredients, collections, keywords, dietTypes, other,
+                    COLLECT(oIngredient.name) AS oIngredients
+                    OPTIONAL MATCH (other)-[:COLLECTION]->(oCollection: Collection)
+                    WITH recipe, ingredients, collections, keywords, dietTypes, other, oIngredients,
+                    COLLECT(oCollection.name) AS oCollections
+                    OPTIONAL MATCH (other)-[:KEYWORD]->(oKeyword: Keyword)
+                    WITH recipe, ingredients, collections, keywords, dietTypes, other, oIngredients, oCollections,
+                    COLLECT(oKeyword.name) AS oKeywords
+                    OPTIONAL MATCH (other)-[:DIET_TYPE]->(oDietType: DietType)
+                    WITH recipe, ingredients, collections, keywords, dietTypes, other, oIngredients, oCollections, oKeywords,
+                    COLLECT(oDietType.name) AS oDietTypes
+    
+                    WITH recipe, ingredients, collections, keywords, dietTypes, other,
+                    SIZE([x IN ingredients WHERE x IN oIngredients]) +
+                    SIZE([x IN collections WHERE x IN oCollections]) +
+                    SIZE([x IN keywords WHERE x IN oKeywords]) +
+                    SIZE([x IN dietTypes WHERE x IN oDietTypes]) AS similarity
+                    ORDER BY similarity DESC
+                    LIMIT 5
+    
+                    RETURN recipe AS selectedRecipe, ingredients, collections, keywords, dietTypes, 
+                    COLLECT({Recipe: other, Similarity: similarity}) AS similarRecipes;
                 ";
 
                 var result = await session.RunAsync(query, new { id });
                 return await result.SingleAsync(record =>
                 {
-                    var node = record["recipe"].As<INode>();
+                    var node = record["selectedRecipe"].As<INode>();
                     var ingredients = record["ingredients"].As<List<string>>();
                     var collections = record["collections"].As<List<string>>();
                     var keywords = record["keywords"].As<List<string>>();
                     var dietTypes = record["dietTypes"].As<List<string>>();
+
+                    var similarRecipes = record["similarRecipes"].As<List<Dictionary<string, object>>>()
+                    .Select(sr => new SimilarRecipe
+                    {
+                        RecipeId = ((INode)sr["Recipe"]).Properties["id"].As<string>(),
+                        RecipeName = ((INode)sr["Recipe"]).Properties["name"].As<string>(), 
+                        SimilarityScore = sr["Similarity"].As<int>()
+                    }).ToList();
 
                     return new Recipe
                     {
@@ -55,7 +90,8 @@ namespace RecipesGlossary.DataAccess.Repositories
                         Ingredients = ingredients.ToArray(),
                         Collections = collections.ToArray(),
                         Keywords = keywords.ToArray(),
-                        DietTypes = dietTypes.ToArray()
+                        DietTypes = dietTypes.ToArray(),
+                        SimilarRecipes = similarRecipes.ToList(),
                     };
                 });
             }
@@ -194,7 +230,7 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredients()
+        public async Task<IEnumerable<CommonIngredientDTO>> GetTop5MostCommonIngredientsAsync()
         {
             using var session = _driver.AsyncSession();
             try
@@ -224,7 +260,7 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthors()
+        public async Task<IEnumerable<ProlificAuthorDTO>> GetTop5MostProlificAuthorsAsync()
         {
             using var session = _driver.AsyncSession();
             try
@@ -254,7 +290,7 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipes()
+        public async Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipesAsync()
         {
             using var session = _driver.AsyncSession();
             try
