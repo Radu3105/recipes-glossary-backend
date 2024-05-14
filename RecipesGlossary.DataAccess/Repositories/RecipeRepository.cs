@@ -65,21 +65,33 @@ namespace RecipesGlossary.DataAccess.Repositories
             }
         }
 
-        public async Task<IEnumerable<RecipeDisplayDTO>> GetPaginatedAsync(int pageNumber, string sortBy, string sortOrder)
+        public async Task<RecipeDisplayWithTotalCountDTO> GetRecipesAsync(int pageNumber, string sortBy, string sortOrder, string searchQuery, List<string> ingredientFilters)
         {
             using var session = _driver.AsyncSession();
             try
             {
                 const int PAGE_SIZE = 20;
                 int skipNumber = (pageNumber - 1) * PAGE_SIZE;
-                string orderByQueryLine;
+
+                var whereClauses = new List<string>();
+                if (ingredientFilters != null && ingredientFilters.Any()) {
+                    whereClauses.Add("ingredient.name IN $ingredientFilters");
+                }
+                if (!string.IsNullOrEmpty(searchQuery)) {
+                    whereClauses.Add($"toLower(recipe.name) CONTAINS toLower($searchQuery)");
+                }
+                var whereClause = whereClauses.Any() ? "WHERE " + string.Join(" AND ", whereClauses) : "";
+                
+                var whereAllClause = ingredientFilters != null && ingredientFilters.Any() ? "WHERE ALL(ing IN $ingredientFilters WHERE ing IN ingredients)" : "";
+
+                string orderByClause;
                 if (sortBy == "name")
                 {
-                    orderByQueryLine = $"ORDER BY lTrim(recipe.{sortBy}) {sortOrder}";
+                    orderByClause = $"ORDER BY lTrim(recipe.{sortBy}) {sortOrder}";
                 }
                 else if (sortBy == "skillLevel")
                 {
-                    orderByQueryLine = $@"
+                    orderByClause = $@"
                         ORDER BY 
                             CASE recipe.skillLevel 
                                 WHEN 'Easy' THEN 1 
@@ -91,129 +103,23 @@ namespace RecipesGlossary.DataAccess.Repositories
                 }
                 else
                 {
-                    orderByQueryLine = $"ORDER BY {sortBy} {sortOrder}";
+                    orderByClause = $"ORDER BY {sortBy} {sortOrder}";
                 }
-                string query = $@"
-                    MATCH (author: Author)-[:WROTE]->(recipe: Recipe)
-                    OPTIONAL MATCH (recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
-                    WITH recipe, author, COLLECT(ingredient) AS ingredients
-                    WITH recipe, author, SIZE(ingredients) AS ingredientCount
-                    {orderByQueryLine}
-                    RETURN recipe, author, ingredientCount
-                    SKIP {skipNumber}
-                    LIMIT {PAGE_SIZE};
-                ";
 
-                var result = await session.RunAsync(query);
-                return await result.ToListAsync(record =>
-                {
-                    var recipeNode = record["recipe"].As<INode>();
-                    var authorNode = record["author"].As<INode>();
-
-                    return new RecipeDisplayDTO
-                    {
-                        RecipeId = recipeNode.Properties["id"].As<string>(),
-                        RecipeName = recipeNode.Properties["name"].As<string>(),
-                        AuthorName = authorNode.Properties["name"].As<string>(),
-                        IngredientCount = record["ingredientCount"].As<int>(),
-                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>()
-                    };
-                });
-            }
-            finally
-            {
-                await session.CloseAsync();
-            }
-        }
-
-        public async Task<SearchByNameDTO> SearchByNameAsync(int pageNumber, string searchQuery)
-        {
-            using var session = _driver.AsyncSession();
-            try
-            {
-                const int PAGE_SIZE = 20;
-                int skipNumber = (pageNumber - 1) * PAGE_SIZE;
-
-                string query = $@"
-                    MATCH (author: Author)-[:WROTE]->(recipe: Recipe)
-                    OPTIONAL MATCH (recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
-                    WITH recipe, author, COLLECT(ingredient) AS ingredients
-                    WITH recipe, author, SIZE(ingredients) AS ingredientCount
-                    WHERE recipe.name CONTAINS $searchQuery
-                    RETURN recipe, author, ingredientCount
-                    SKIP {skipNumber}
-                    LIMIT {PAGE_SIZE};
-                ";
-
-                string totalMatchingQuery = $@"
-                    MATCH (recipe:Recipe)
-                    WHERE recipe.name CONTAINS $searchQuery
-                    RETURN COUNT(recipe) AS totalMatchingRecipes;
-                ";
-
-                var result = await session.RunAsync(query, new { searchQuery });
-                var recipes = await result.ToListAsync(record =>
-                {
-                    var recipeNode = record["recipe"].As<INode>();
-                    var authorNode = record["author"].As<INode>();
-
-                    return new RecipeDisplayDTO
-                    {
-                        RecipeId = recipeNode.Properties["id"].As<string>(),
-                        RecipeName = recipeNode.Properties["name"].As<string>(),
-                        AuthorName = authorNode.Properties["name"].As<string>(),
-                        IngredientCount = record["ingredientCount"].As<int>(),
-                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>()
-                    };
-                });
-
-                var countResult = await session.RunAsync(totalMatchingQuery, new { searchQuery });
-                var totalCountRecord = await countResult.SingleAsync();
-                var totalCount = totalCountRecord["totalMatchingRecipes"].As<int>();
-
-                return new SearchByNameDTO
-                {
-                    Recipes = recipes,
-                    TotalCount = totalCount
-                };
-            }
-            finally
-            {
-                await session.CloseAsync();
-            }
-        }
-
-        public async Task<FilterByIngredientRecipeDTO> FilterByIngredientsAsync(int pageNumber, List<string> ingredientList)
-        {
-            using var session = _driver.AsyncSession();
-            try
-            {
-                const int PAGE_SIZE = 20;
-                int skipNumber = (pageNumber - 1) * PAGE_SIZE;
-
-                string query = $@"
+                var query = $@"
                     MATCH (author: Author)-[:WROTE]->(recipe: Recipe)
                     MATCH (recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
-                    WITH recipe, author, ingredient, COLLECT(ingredient) AS initialIngredients
-                    WITH recipe, author, ingredient, SIZE(initialIngredients) AS ingredientCount
-                    WHERE ingredient.name IN $ingredientList
-                    WITH recipe, author, ingredientCount, COLLECT(ingredient.name) AS ingredients
-                    WHERE ALL(ing IN $ingredientList WHERE ing IN ingredients)
-                    RETURN recipe, author, ingredientCount
-                    ORDER BY recipe.name
-                    SKIP {skipNumber}
-                    LIMIT {PAGE_SIZE};
+                    WITH recipe, author, COLLECT(DISTINCT ingredient.name) AS allIngredients
+                    WHERE {(!string.IsNullOrEmpty(searchQuery) ? $"toLower(recipe.name) CONTAINS toLower($searchQuery) AND " : "")}
+                    {(ingredientFilters != null && ingredientFilters.Any() ? "ALL(ing IN $ingredientFilters WHERE ing IN allIngredients)" : "true")}
+                    WITH recipe, author, allIngredients
+                    RETURN recipe, author, SIZE(allIngredients) AS ingredientCount
+                    {orderByClause}
+                    SKIP $skipNumber
+                    LIMIT $PAGE_SIZE;
                 ";
-
-                string totalMatchingQuery = $@"
-                    MATCH (recipe: Recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
-                    WHERE ingredient.name IN $ingredientList
-                    WITH recipe, COLLECT(ingredient) AS ingredients
-                    WHERE ALL(ing IN $ingredientList WHERE ing IN [i.name FOR i IN ingredients])
-                    RETURN count(DISTINCT recipe) AS totalMatchingRecipes;
-                ";
-
-                var result = await session.RunAsync(query, new { ingredientList });
+                
+                var result = await session.RunAsync(query, new { ingredientFilters, searchQuery, skipNumber, PAGE_SIZE });
                 var recipes = await result.ToListAsync(record =>
                 {
                     var recipeNode = record["recipe"].As<INode>();
@@ -225,21 +131,27 @@ namespace RecipesGlossary.DataAccess.Repositories
                         RecipeName = recipeNode.Properties["name"].As<string>(),
                         AuthorName = authorNode.Properties["name"].As<string>(),
                         IngredientCount = record["ingredientCount"].As<int>(), 
-                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>() 
+                        SkillLevel = recipeNode.Properties["skillLevel"].As<string>(),
                     };
                 });
 
-                var countResult = await session.RunAsync(totalMatchingQuery, new { ingredientList });
-                var totalCountRecord = await countResult.SingleAsync();
-                var totalCount = totalCountRecord["totalMatchingRecipes"].As<int>();
+                var countQuery = $@"
+                    MATCH (author: Author)-[:WROTE]->(recipe: Recipe)
+                    MATCH (recipe)-[:CONTAINS_INGREDIENT]->(ingredient: Ingredient)
+                    {whereClause}
+                    WITH recipe, author, COLLECT(DISTINCT ingredient.name) AS ingredients
+                    {whereAllClause}
+                    RETURN count(DISTINCT recipe) AS total;
+                ";
+                var countResult = await session.RunAsync(countQuery, new { ingredientFilters, searchQuery });
+                var totalCount = (await countResult.SingleAsync())["total"].As<int>();
 
-                return new FilterByIngredientRecipeDTO
+                return new RecipeDisplayWithTotalCountDTO
                 {
                     Recipes = recipes,
                     TotalCount = totalCount
                 };
             }
-
             finally
             {
                 await session.CloseAsync();
@@ -372,26 +284,6 @@ namespace RecipesGlossary.DataAccess.Repositories
                         SkillLevel = recipeNode.Properties["skillLevel"].As<string>()
                     };
                 });
-            }
-            finally
-            {
-                await session.CloseAsync();
-            }
-        }
-
-        public async Task<int> CountRecipesAsync()
-        {
-            using var session = _driver.AsyncSession();
-            try
-            {
-                var query = @"
-                    MATCH (recipe: Recipe)
-                    RETURN COUNT(recipe) AS total;
-                ";
-
-                var result = await session.RunAsync(query);
-                var record = await result.SingleAsync();
-                return record["total"].As<int>();
             }
             finally
             {

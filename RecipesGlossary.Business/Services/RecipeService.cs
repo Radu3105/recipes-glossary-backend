@@ -25,19 +25,9 @@ namespace RecipesGlossary.Business.Services
             return await _recipeRepository.GetByIdAsync(id);
         }
 
-        public async Task<IEnumerable<RecipeDisplayDTO>> GetPaginatedRecipesAsync(int pageNumber, string sortBy, string sortOrder)
+        public async Task<RecipeDisplayWithTotalCountDTO> GetRecipesAsync(int pageNumber, string sortBy, string sortOrder, string searchQuery, List<string> ingredientFilters)
         {
-            return await _recipeRepository.GetPaginatedAsync(pageNumber, sortBy, sortOrder);
-        }
-            
-        public async Task<SearchByNameDTO> SearchRecipesByNameAsync(int pageNumber, string searchQuery)
-        {
-            return await _recipeRepository.SearchByNameAsync(pageNumber, searchQuery);
-        }
-
-        public async Task<FilterByIngredientRecipeDTO> FilterRecipesByIngredientsAsync (int pageNumber, List<string> ingredients)
-        {
-            return await _recipeRepository.FilterByIngredientsAsync(pageNumber, ingredients);
+            return await _recipeRepository.GetRecipesAsync(pageNumber, sortBy, sortOrder, searchQuery, ingredientFilters);
         }
 
         public async Task<IEnumerable<AuthorDisplayDTO>> GetRecipesByAuthorAsync (string authorName, int pageNumber)
@@ -58,11 +48,6 @@ namespace RecipesGlossary.Business.Services
         public async Task<IEnumerable<RecipeDisplayDTO>> GetTop5MostComplexRecipes()
         {
             return await _recipeRepository.GetTop5MostComplexRecipes();
-        }
-
-        public async Task<int> GetTotalRecipesAsync()
-        {
-            return await _recipeRepository.CountRecipesAsync();
         }
 
         public async Task<int> GetTotalRecipesByAuthorAsync(string authorName)

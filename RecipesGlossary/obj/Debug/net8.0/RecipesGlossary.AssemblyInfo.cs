@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RecipesGlossary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a41d4d2908e3198d943b516777ce03b7d3c732fc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0349c9d8754fdf40763e454f8072725391d1f09d")]
 [assembly: System.Reflection.AssemblyProductAttribute("RecipesGlossary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RecipesGlossary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Neo4j.Driver;
 using RecipesGlossary.Business.Services;
 using RecipesGlossary.DataAccess.Abstractions;
+using RecipesGlossary.DataAccess.Models;
 using RecipesGlossary.DataAccess.Repositories;
 
 namespace RecipesGlossary.Controllers
@@ -24,23 +26,14 @@ namespace RecipesGlossary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRecipes(int pageNumber, string sortBy = "name", string sortOrder = "ASC")
+        public async Task<IActionResult> GetRecipesAsync(
+            [FromQuery] int pageNumber, 
+            [FromQuery] string sortBy, 
+            [FromQuery] string sortOrder, 
+            [FromQuery] string searchQuery = "", 
+            [FromQuery] List<string> ingredientFilters = null)
         {
-            var recipes = await _recipeService.GetPaginatedRecipesAsync(pageNumber, sortBy, sortOrder);
-            return Ok(recipes);
-        }
-
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchRecipesByName(int pageNumber, string searchQuery)
-        {
-            var recipes = await _recipeService.SearchRecipesByNameAsync(pageNumber, searchQuery);
-            return Ok(recipes);
-        }
-
-        [HttpGet("filter")]
-        public async Task<IActionResult> FilterRecipesByIngredients(int pageNumber, [FromQuery] List<string> ingredients)
-        {
-            var recipes = await _recipeService.FilterRecipesByIngredientsAsync(pageNumber, ingredients);
+            var recipes = await _recipeService.GetRecipesAsync(pageNumber, sortBy, sortOrder, searchQuery, ingredientFilters);
             return Ok(recipes);
         }
 
@@ -49,13 +42,6 @@ namespace RecipesGlossary.Controllers
         {
             var recipes = await _recipeService.GetRecipesByAuthorAsync(authorName, pageNumber);
             return Ok(recipes);
-        }
-
-        [HttpGet("count")]
-        public async Task<IActionResult> GetTotalRecipes()
-        {
-            var total = await _recipeService.GetTotalRecipesAsync();
-            return Ok(total);
         }
 
         [HttpGet("count/{authorName}")]
